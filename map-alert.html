@@ -99,31 +99,44 @@
 
     // Pontos azuis (monitoramento normal)
     const pontosAzuis = [
-      { nome: "Rio de Janeiro", coords: [-22.9068, -43.1729] },
-      { nome: "Niterói", coords: [-22.8894, -43.2627] },
-      { nome: "Nova Iguaçu", coords: [-22.7556, -43.4603] },
-      { nome: "São Gonçalo", coords: [-22.8268, -43.0634] },
-      { nome: "Petrópolis", coords: [-22.5059, -43.1785] },
-      { nome: "Magé", coords: [-22.6632, -43.0315] },
-      { nome: "Itaboraí", coords: [-22.7565, -42.8535] },
-      { nome: "Belford Roxo", coords: [-22.764, -43.3992] },
-      { nome: "Queimados", coords: [-22.7102, -43.5518] },
-      { nome: "Mesquita", coords: [-22.7831, -43.4359] },
-      { nome: "Nilópolis", coords: [-22.8058, -43.4233] },
-      { nome: "Teresópolis", coords: [-22.4165, -42.9752] },
-      { nome: "Maricá", coords: [-22.9354, -42.8246] },
-      { nome: "Cabo Frio", coords: [-22.8894, -42.0286] },
-      { nome: "Angra dos Reis", coords: [-23.0067, -44.3181] }
+      { nome: "Rio de Janeiro", coords: [-22.9068, -43.1729], chuva: "12 mm (24h)", nivel: "Baixo" },
+      { nome: "Campos dos Goytacazes", coords: [-21.7567, -41.3283], chuva: "7 mm (24h)", nivel: "Baixo" },
+      { nome: "Volta Redonda", coords: [-22.5242, -44.1044], chuva: "15 mm (24h)", nivel: "Médio" },
+      { nome: "Barra Mansa", coords: [-22.5411, -44.1739], chuva: "10 mm (24h)", nivel: "Baixo" },
+      { nome: "Angra dos Reis", coords: [-23.0067, -44.3181], chuva: "18 mm (24h)", nivel: "Médio" },
+      { nome: "Niterói", coords: [-22.8894, -43.2627], chuva: "8 mm (24h)", nivel: "Baixo" },
+      { nome: "Nova Iguaçu", coords: [-22.7556, -43.4603], chuva: "11 mm (24h)", nivel: "Baixo" },
+      { nome: "São Gonçalo", coords: [-22.8268, -43.0634], chuva: "9 mm (24h)", nivel: "Baixo" },
+      { nome: "Petrópolis", coords: [-22.5059, -43.1785], chuva: "20 mm (24h)", nivel: "Médio" },
+      { nome: "Magé", coords: [-22.6632, -43.0315], chuva: "13 mm (24h)", nivel: "Baixo" },
+      { nome: "Itaboraí", coords: [-22.7565, -42.8535], chuva: "6 mm (24h)", nivel: "Baixo" },
+      { nome: "Belford Roxo", coords: [-22.764, -43.3992], chuva: "10 mm (24h)", nivel: "Baixo" },
+      { nome: "Queimados", coords: [-22.7102, -43.5518], chuva: "14 mm (24h)", nivel: "Baixo" },
+      { nome: "Mesquita", coords: [-22.7831, -43.4359], chuva: "8 mm (24h)", nivel: "Baixo" },
+      { nome: "Nilópolis", coords: [-22.8058, -43.4233], chuva: "7 mm (24h)", nivel: "Baixo" },
+      { nome: "Teresópolis", coords: [-22.4165, -42.9752], chuva: "22 mm (24h)", nivel: "Médio" },
+      { nome: "Maricá", coords: [-22.9354, -42.8246], chuva: "5 mm (24h)", nivel: "Baixo" },
+      { nome: "Cabo Frio", coords: [-22.8894, -42.0286], chuva: "4 mm (24h)", nivel: "Baixo" }
     ];
 
     pontosAzuis.forEach(ponto => {
       L.marker(ponto.coords, { icon: blueIcon }).addTo(map)
-        .bindPopup(`${ponto.nome} - Monitoramento Normal`);
+        .bindPopup(
+          `<b>${ponto.nome}</b><br>
+      Chuva: ${ponto.chuva}<br>
+      Nível do rio: ${ponto.nivel}<br>
+      Monitoramento Normal`
+        );
     });
 
-    // Ponto vermelho (alerta)
+    // Ponto vermelho (alerta) com dados pluviométricos fictícios
     L.marker([-22.7858, -43.3117], { icon: redIcon }).addTo(map)
-      .bindPopup('<b>Duque de Caxias</b><br><span style="color:red;">Alerta de Inundação!</span>');
+      .bindPopup(
+        `<b>Duque de Caxias</b><br>
+    Chuva: 55 mm (24h)<br>
+    Nível do rio: Alto<br>
+    <span style="color:red;">Alerta de Inundação!</span>`
+      );
   </script>
 </body>
 

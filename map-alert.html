@@ -52,6 +52,34 @@
       width: 24px;
       height: 38px;
     }
+
+    #detalhes-conteudo table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    #detalhes-conteudo td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    #detalhes-conteudo tr:last-child td {
+      border-bottom: none;
+    }
+
+    #detalhes-conteudo td:first-child {
+      font-weight: 500;
+      color: #1a237e;
+      width: 220px;
+    }
+
+    #detalhes-conteudo td:last-child {
+      color: #333;
+    }
   </style>
 </head>
 
@@ -65,6 +93,13 @@
           alt="Normal"> Monitoramento Normal</span>
       <span><img src="https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-red.png"
           alt="Alerta"> Alerta de Inundação</span>
+    </div>
+    <!-- painel de detalhes -->
+    <div id="detalhes-estacao"
+      style="display:none; margin-top:2rem; background:#f4f6fa; border-radius:1rem; padding:2rem; box-shadow:0 2px 8px #0001;">
+      <h2 id="detalhes-titulo" style="margin-top:0"></h2>
+      <div id="detalhes-conteudo"></div>
+      <canvas id="grafico-nivel" style="margin-top:2rem;max-width:100%;"></canvas>
     </div>
   </div>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -119,25 +154,315 @@
       { nome: "Cabo Frio", coords: [-22.8894, -42.0286], chuva: "4 mm (24h)", nivel: "Baixo" }
     ];
 
+    // Dados extras para cada cidade
+    const dadosExtras = {
+      "Rio de Janeiro": {
+        nivelAgua: "-0.96 m",
+        horarioNivel: "2025-06-09 14:42",
+        vento: "9.5 km/h",
+        horarioVento: "2025-06-09 14:36",
+        pressao: "1017.4 mb",
+        horarioPressao: "2025-06-09 14:36",
+        proximaMareAlta: "2025-06-10 01:02",
+        valorMareAlta: "-0.88 m",
+        maiorAmanha: "2025-06-10 10:24",
+        valorMaiorAmanha: "0.91 m"
+      },
+      "Campos dos Goytacazes": {
+        nivelAgua: "0.45 m",
+        horarioNivel: "2025-06-09 14:40",
+        vento: "7.2 km/h",
+        horarioVento: "2025-06-09 14:35",
+        pressao: "1016.1 mb",
+        horarioPressao: "2025-06-09 14:35",
+        proximaMareAlta: "2025-06-10 02:10",
+        valorMareAlta: "0.60 m",
+        maiorAmanha: "2025-06-10 11:10",
+        valorMaiorAmanha: "0.75 m"
+      },
+      "Volta Redonda": {
+        nivelAgua: "1.10 m",
+        horarioNivel: "2025-06-09 14:38",
+        vento: "6.8 km/h",
+        horarioVento: "2025-06-09 14:32",
+        pressao: "1015.8 mb",
+        horarioPressao: "2025-06-09 14:32",
+        proximaMareAlta: "2025-06-10 01:55",
+        valorMareAlta: "1.20 m",
+        maiorAmanha: "2025-06-10 10:50",
+        valorMaiorAmanha: "1.35 m"
+      },
+      "Barra Mansa": {
+        nivelAgua: "0.80 m",
+        horarioNivel: "2025-06-09 14:37",
+        vento: "5.9 km/h",
+        horarioVento: "2025-06-09 14:30",
+        pressao: "1016.0 mb",
+        horarioPressao: "2025-06-09 14:30",
+        proximaMareAlta: "2025-06-10 02:20",
+        valorMareAlta: "0.95 m",
+        maiorAmanha: "2025-06-10 11:20",
+        valorMaiorAmanha: "1.10 m"
+      },
+      "Angra dos Reis": {
+        nivelAgua: "1.50 m",
+        horarioNivel: "2025-06-09 14:45",
+        vento: "10.1 km/h",
+        horarioVento: "2025-06-09 14:40",
+        pressao: "1014.9 mb",
+        horarioPressao: "2025-06-09 14:40",
+        proximaMareAlta: "2025-06-10 01:40",
+        valorMareAlta: "1.60 m",
+        maiorAmanha: "2025-06-10 10:40",
+        valorMaiorAmanha: "1.80 m"
+      },
+      "Niterói": {
+        nivelAgua: "-0.20 m",
+        horarioNivel: "2025-06-09 14:43",
+        vento: "8.2 km/h",
+        horarioVento: "2025-06-09 14:38",
+        pressao: "1017.0 mb",
+        horarioPressao: "2025-06-09 14:38",
+        proximaMareAlta: "2025-06-10 01:50",
+        valorMareAlta: "-0.10 m",
+        maiorAmanha: "2025-06-10 10:50",
+        valorMaiorAmanha: "0.60 m"
+      },
+      "Nova Iguaçu": {
+        nivelAgua: "0.30 m",
+        horarioNivel: "2025-06-09 14:41",
+        vento: "7.0 km/h",
+        horarioVento: "2025-06-09 14:36",
+        pressao: "1016.5 mb",
+        horarioPressao: "2025-06-09 14:36",
+        proximaMareAlta: "2025-06-10 02:00",
+        valorMareAlta: "0.40 m",
+        maiorAmanha: "2025-06-10 11:00",
+        valorMaiorAmanha: "0.55 m"
+      },
+      "São Gonçalo": {
+        nivelAgua: "0.10 m",
+        horarioNivel: "2025-06-09 14:39",
+        vento: "6.5 km/h",
+        horarioVento: "2025-06-09 14:34",
+        pressao: "1016.8 mb",
+        horarioPressao: "2025-06-09 14:34",
+        proximaMareAlta: "2025-06-10 01:45",
+        valorMareAlta: "0.20 m",
+        maiorAmanha: "2025-06-10 10:45",
+        valorMaiorAmanha: "0.35 m"
+      },
+      "Petrópolis": {
+        nivelAgua: "1.80 m",
+        horarioNivel: "2025-06-09 14:46",
+        vento: "9.0 km/h",
+        horarioVento: "2025-06-09 14:41",
+        pressao: "1015.2 mb",
+        horarioPressao: "2025-06-09 14:41",
+        proximaMareAlta: "2025-06-10 02:30",
+        valorMareAlta: "1.90 m",
+        maiorAmanha: "2025-06-10 11:30",
+        valorMaiorAmanha: "2.10 m"
+      },
+      "Magé": {
+        nivelAgua: "0.60 m",
+        horarioNivel: "2025-06-09 14:44",
+        vento: "7.8 km/h",
+        horarioVento: "2025-06-09 14:39",
+        pressao: "1016.3 mb",
+        horarioPressao: "2025-06-09 14:39",
+        proximaMareAlta: "2025-06-10 02:15",
+        valorMareAlta: "0.70 m",
+        maiorAmanha: "2025-06-10 11:15",
+        valorMaiorAmanha: "0.85 m"
+      },
+      "Itaboraí": {
+        nivelAgua: "0.05 m",
+        horarioNivel: "2025-06-09 14:42",
+        vento: "6.2 km/h",
+        horarioVento: "2025-06-09 14:37",
+        pressao: "1017.2 mb",
+        horarioPressao: "2025-06-09 14:37",
+        proximaMareAlta: "2025-06-10 01:55",
+        valorMareAlta: "0.10 m",
+        maiorAmanha: "2025-06-10 10:55",
+        valorMaiorAmanha: "0.25 m"
+      },
+      "Belford Roxo": {
+        nivelAgua: "0.20 m",
+        horarioNivel: "2025-06-09 14:40",
+        vento: "7.1 km/h",
+        horarioVento: "2025-06-09 14:35",
+        pressao: "1016.7 mb",
+        horarioPressao: "2025-06-09 14:35",
+        proximaMareAlta: "2025-06-10 02:05",
+        valorMareAlta: "0.30 m",
+        maiorAmanha: "2025-06-10 11:05",
+        valorMaiorAmanha: "0.45 m"
+      },
+      "Queimados": {
+        nivelAgua: "0.15 m",
+        horarioNivel: "2025-06-09 14:41",
+        vento: "6.7 km/h",
+        horarioVento: "2025-06-09 14:36",
+        pressao: "1016.9 mb",
+        horarioPressao: "2025-06-09 14:36",
+        proximaMareAlta: "2025-06-10 02:12",
+        valorMareAlta: "0.22 m",
+        maiorAmanha: "2025-06-10 11:12",
+        valorMaiorAmanha: "0.38 m"
+      },
+      "Mesquita": {
+        nivelAgua: "0.12 m",
+        horarioNivel: "2025-06-09 14:39",
+        vento: "6.3 km/h",
+        horarioVento: "2025-06-09 14:34",
+        pressao: "1017.1 mb",
+        horarioPressao: "2025-06-09 14:34",
+        proximaMareAlta: "2025-06-10 02:08",
+        valorMareAlta: "0.18 m",
+        maiorAmanha: "2025-06-10 11:08",
+        valorMaiorAmanha: "0.33 m"
+      },
+      "Nilópolis": {
+        nivelAgua: "0.10 m",
+        horarioNivel: "2025-06-09 14:38",
+        vento: "6.0 km/h",
+        horarioVento: "2025-06-09 14:33",
+        pressao: "1017.3 mb",
+        horarioPressao: "2025-06-09 14:33",
+        proximaMareAlta: "2025-06-10 02:04",
+        valorMareAlta: "0.15 m",
+        maiorAmanha: "2025-06-10 11:04",
+        valorMaiorAmanha: "0.28 m"
+      },
+      "Teresópolis": {
+        nivelAgua: "1.60 m",
+        horarioNivel: "2025-06-09 14:47",
+        vento: "8.8 km/h",
+        horarioVento: "2025-06-09 14:42",
+        pressao: "1015.5 mb",
+        horarioPressao: "2025-06-09 14:42",
+        proximaMareAlta: "2025-06-10 02:35",
+        valorMareAlta: "1.70 m",
+        maiorAmanha: "2025-06-10 11:35",
+        valorMaiorAmanha: "1.95 m"
+      },
+      "Maricá": {
+        nivelAgua: "0.08 m",
+        horarioNivel: "2025-06-09 14:37",
+        vento: "5.8 km/h",
+        horarioVento: "2025-06-09 14:32",
+        pressao: "1017.5 mb",
+        horarioPressao: "2025-06-09 14:32",
+        proximaMareAlta: "2025-06-10 01:58",
+        valorMareAlta: "0.12 m",
+        maiorAmanha: "2025-06-10 10:58",
+        valorMaiorAmanha: "0.22 m"
+      },
+      "Cabo Frio": {
+        nivelAgua: "0.03 m",
+        horarioNivel: "2025-06-09 14:36",
+        vento: "5.5 km/h",
+        horarioVento: "2025-06-09 14:31",
+        pressao: "1017.8 mb",
+        horarioPressao: "2025-06-09 14:31",
+        proximaMareAlta: "2025-06-10 01:53",
+        valorMareAlta: "0.07 m",
+        maiorAmanha: "2025-06-10 10:53",
+        valorMaiorAmanha: "0.17 m"
+      }
+    };
+
+    function mostrarDetalhes(ponto, alerta = false) {
+      const extras = dadosExtras[ponto.nome] || {};
+      document.getElementById('detalhes-estacao').style.display = 'block';
+      document.getElementById('detalhes-titulo').innerText = ponto.nome;
+      document.getElementById('detalhes-conteudo').innerHTML = `
+    <table>
+      <tr><td>Chuva (24h):</td><td>${ponto.chuva}</td></tr>
+      <tr><td>Nível do rio:</td><td>${ponto.nivel}</td></tr>
+      <tr><td>Status:</td><td>${alerta ? '<span style="color:red;">Alerta de Inundação!</span>' : 'Monitoramento Normal'}</td></tr>
+      <tr><td>Nível da água atual:</td><td>${extras.nivelAgua || '--'} <span style="color:#888;">(${extras.horarioNivel || '--'})</span></td></tr>
+      <tr><td>Velocidade do vento:</td><td>${extras.vento || '--'} <span style="color:#888;">(${extras.horarioVento || '--'})</span></td></tr>
+      <tr><td>Pressão barométrica:</td><td>${extras.pressao || '--'} <span style="color:#888;">(${extras.horarioPressao || '--'})</span></td></tr>
+      <tr><td>Próxima maré alta:</td><td>${extras.proximaMareAlta || '--'} <span style="color:#888;">(${extras.valorMareAlta || '--'})</span></td></tr>
+      <tr><td>Maior nível amanhã:</td><td>${extras.maiorAmanha || '--'} <span style="color:#888;">(${extras.valorMaiorAmanha || '--'})</span></td></tr>
+      <tr><td colspan="2"><b>Última atualização:</b> ${new Date().toLocaleString('pt-BR')}</td></tr>
+    </table>
+  `;
+
+      // Exemplo de dados fictícios para o gráfico (últimas 12 horas)
+      const labels = [
+        "03h", "05h", "07h", "09h", "11h", "13h", "15h", "17h", "19h", "21h", "23h", "01h"
+      ];
+      // Gere valores aleatórios próximos do nível atual para simular histórico
+      let base = parseFloat((extras.nivelAgua || "0").replace(",", "."));
+      if (isNaN(base)) base = 0;
+      const data = Array.from({ length: 12 }, (_, i) =>
+        (base + (Math.random() - 0.5) * 0.5).toFixed(2)
+      );
+
+      // Destroi gráfico anterior se existir
+      if (window.graficoNivel) window.graficoNivel.destroy();
+
+      const ctx = document.getElementById('grafico-nivel').getContext('2d');
+      window.graficoNivel = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Nível da água (m)',
+            data: data,
+            borderColor: alerta ? '#d32f2f' : '#1976d2',
+            backgroundColor: alerta ? 'rgba(211,47,47,0.1)' : 'rgba(25,118,210,0.08)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: { display: true, text: 'Metros' }
+            }
+          }
+        }
+      });
+    }
+
     pontosAzuis.forEach(ponto => {
       L.marker(ponto.coords, { icon: blueIcon }).addTo(map)
         .bindPopup(
           `<b>${ponto.nome}</b><br>
-      Chuva: ${ponto.chuva}<br>
-      Nível do rio: ${ponto.nivel}<br>
-      Monitoramento Normal`
-        );
+          Chuva: ${ponto.chuva}<br>
+          Nível do rio: ${ponto.nivel}<br>
+          Monitoramento Normal`
+        )
+        .on('click', () => mostrarDetalhes(ponto));
     });
 
     // Ponto vermelho (alerta) com dados pluviométricos fictícios
+    const pontoAlerta = {
+      nome: "Duque de Caxias",
+      chuva: "55 mm (24h)",
+      nivel: "Alto"
+    };
     L.marker([-22.7858, -43.3117], { icon: redIcon }).addTo(map)
       .bindPopup(
         `<b>Duque de Caxias</b><br>
-    Chuva: 55 mm (24h)<br>
-    Nível do rio: Alto<br>
-    <span style="color:red;">Alerta de Inundação!</span>`
-      );
+        Chuva: 55 mm (24h)<br>
+        Nível do rio: Alto<br>
+        <span style="color:red;">Alerta de Inundação!</span>`
+      )
+      .on('click', () => mostrarDetalhes(pontoAlerta, true));
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
 </html>

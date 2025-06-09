@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt_BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa de Alertas - SIRAE</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      margin: 0;
+      background: #f7f7f7;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px #0001;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a237e;
+    }
+
+    #map {
+      width: 100%;
+      height: 500px;
+      border-radius: 1rem;
+      margin-top: 2rem;
+    }
+
+    .legend {
+      margin-top: 1rem;
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .legend img {
+      width: 24px;
+      height: 38px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Mapa de Alertas de Inundação</h1>
+    <p style="text-align:center;">Clique nos marcadores para mais informações.</p>
+    <div id="map"></div>
+    <div class="legend">
+      <span><img src="https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-blue.png"
+          alt="Normal"> Monitoramento Normal</span>
+      <span><img src="https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-red.png"
+          alt="Alerta"> Alerta de Inundação</span>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Inicializa o mapa centralizado no Rio de Janeiro
+    var map = L.map('map').setView([-22.9, -43.2], 9);
+
+    // Adiciona o mapa base do OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Ícone azul (normal)
+    var blueIcon = new L.Icon({
+      iconUrl: 'https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-blue.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    // Ícone vermelho (alerta)
+    var redIcon = new L.Icon({
+      iconUrl: 'https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    // Pontos azuis (monitoramento normal)
+    const pontosAzuis = [
+      { nome: "Rio de Janeiro", coords: [-22.9068, -43.1729] },
+      { nome: "Niterói", coords: [-22.8894, -43.2627] },
+      { nome: "Nova Iguaçu", coords: [-22.7556, -43.4603] },
+      { nome: "São Gonçalo", coords: [-22.8268, -43.0634] },
+      { nome: "Petrópolis", coords: [-22.5059, -43.1785] },
+      { nome: "Magé", coords: [-22.6632, -43.0315] },
+      { nome: "Itaboraí", coords: [-22.7565, -42.8535] },
+      { nome: "Belford Roxo", coords: [-22.764, -43.3992] },
+      { nome: "Queimados", coords: [-22.7102, -43.5518] },
+      { nome: "Mesquita", coords: [-22.7831, -43.4359] },
+      { nome: "Nilópolis", coords: [-22.8058, -43.4233] },
+      { nome: "Teresópolis", coords: [-22.4165, -42.9752] },
+      { nome: "Maricá", coords: [-22.9354, -42.8246] },
+      { nome: "Cabo Frio", coords: [-22.8894, -42.0286] },
+      { nome: "Angra dos Reis", coords: [-23.0067, -44.3181] }
+    ];
+
+    pontosAzuis.forEach(ponto => {
+      L.marker(ponto.coords, { icon: blueIcon }).addTo(map)
+        .bindPopup(`${ponto.nome} - Monitoramento Normal`);
+    });
+
+    // Ponto vermelho (alerta)
+    L.marker([-22.7858, -43.3117], { icon: redIcon }).addTo(map)
+      .bindPopup('<b>Duque de Caxias</b><br><span style="color:red;">Alerta de Inundação!</span>');
+  </script>
+</body>
+
+</html>

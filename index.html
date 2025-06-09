@@ -228,7 +228,10 @@
         <div class="container grid">
             <div class="brand">
                 <a class="logo logo-alt" href="#home"><span>SIRAE</span></a>
-                <p>©2025 SIARE.</p>
+                <p><span style="color: white;" id="current-year"></span> ©SIRAE.</p>
+                <script>
+                    document.getElementById('current-year').textContent = new Date().getFullYear();
+                </script>
                 <p>Todos os direitos reservados.</p>
             </div>
 
